@@ -11,6 +11,7 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $nome = $_POST['nome'];
     $email = $_POST['email'];
     $senha = $_POST['senha'];
 
@@ -19,18 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $senhaHash = hash('sha256', $senha);
 
-        $stmt = $conn->prepare("INSERT INTO usuarios (email, senha) VALUES (?, ?)");
-        $stmt->bind_param("ss", $email, $senhaHash);
-
+        $stmt = $conn->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $nome, $email, $senhaHash);
+        
         if ($stmt->execute()) {
-            header("Location: ../loginusuarios.html");
+            header("Location: ../index.html");
+            exit; // Para garantir que o script pare de executar após o redirecionamento
         } else {
             echo "Erro ao cadastrar usuário: " . $stmt->error;
         }
-
+        
         $stmt->close();
-    }
-}
-
+        
+    }}
 $conn->close();
 ?>

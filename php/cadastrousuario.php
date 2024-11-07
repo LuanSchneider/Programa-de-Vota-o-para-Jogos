@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if ($stmt->execute()) {
             header("Location: ../index.html");
-            exit; // Para garantir que o script pare de executar após o redirecionamento
+            exit;
         } else {
             echo "Erro ao cadastrar usuário: " . $stmt->error;
         }

@@ -17,7 +17,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    header("Location: ../votacao.html");
+    header("Location: ../votacao.php");
     exit();
 } else {
     echo "<script>alert('Nome de usuário ou senha incorretos'); window.location.href='../index.html';</script>";

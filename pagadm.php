@@ -12,7 +12,6 @@ include("php/conectadb.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'])) {
     $nome = $_POST['nome'];
-    
     $stmt = $conn->prepare("SELECT email, senha FROM usuarios WHERE nome = ?");
     $stmt->bind_param("s", $nome);
     $stmt->execute();
@@ -47,8 +46,18 @@ while ($row = mysqli_fetch_assoc($result)) {
 }
 ?>
 
-<div id="popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background-color:#fff; padding:20px; border:1px solid #ddd; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2);">
-    <button onclick="fecharPopup()">Fechar</button>
+<button id="botaoAdicionarImagem" onclick="abrirPopupImagem()">Criar uma postagem</button>
+
+<div id="popup-imagem" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background-color:#fff; padding:20px; border:1px solid #ddd; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2);">
+<h2>Adicionar Imagem</h2>
+<form id="formImagem" enctype="multipart/form-data">
+    <input type="file" id="imagemInput" name="imagem" accept="image/*" onchange="previewImagem()"><br><br>
+    <input type="text" id="descricaoInput" name="descricao" placeholder="Descrição"><br><br>
+    <div id="imagePreview" class="image-preview"></div>
+    <button type="button" onclick="postarImagem()">Postar</button>
+    <button type="button" onclick="fecharPopupImagem()">Fechar</button>
+</form>
+
 </div>
 
 <script>
@@ -65,8 +74,60 @@ while ($row = mysqli_fetch_assoc($result)) {
         xhr.send('nome=' + encodeURIComponent(nome));
     }
 
-    function fecharPopup() {
-        document.getElementById('popup').style.display = 'none';
+    function fecharPopupImagem() {
+        document.getElementById('popup-imagem').style.display = 'none';
+        document.getElementById('imagePreview').innerHTML = '';
+    }
+
+    function abrirPopupImagem() {
+        document.getElementById('popup-imagem').style.display = 'block';
+    }
+
+    function previewImagem() {
+        var imagemInput = document.getElementById('imagemInput').files[0];
+        var descricaoInput = document.getElementById('descricaoInput').value;
+        var imagePreview = document.getElementById('imagePreview');
+        imagePreview.innerHTML = '';
+
+        if (imagemInput) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var card = document.createElement('div');
+                card.classList.add('card');
+                
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                card.appendChild(img);
+                
+                var description = document.createElement('div');
+                description.classList.add('description');
+                description.textContent = descricaoInput || 'Sem descrição';
+                card.appendChild(description);
+                
+                imagePreview.appendChild(card);
+            };
+            reader.readAsDataURL(imagemInput);
+        }
+    }
+
+    function postarImagem() {
+        var form = document.getElementById('formImagem');
+        var imagemInput = document.getElementById('imagemInput').files[0];
+        var descricaoInput = document.getElementById('descricaoInput').value;
+        var formData = new FormData();
+
+        formData.append('imagem', imagemInput);
+        formData.append('descricao', descricaoInput);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'php/salvar_imagem.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                alert('Imagem postada com sucesso!');
+                fecharPopupImagem();
+            }
+        };
+        xhr.send(formData);
     }
 </script>
 

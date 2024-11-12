@@ -46,18 +46,23 @@ while ($row = mysqli_fetch_assoc($result)) {
 }
 ?>
 
+
+<div id="popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background-color:#fff; padding:20px; border:1px solid #ddd; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2);">
+</div>
+
 <button id="botaoAdicionarImagem" onclick="abrirPopupImagem()">Criar uma postagem</button>
 
-<div id="popup-imagem" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background-color:#fff; padding:20px; border:1px solid #ddd; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2);">
-<h2>Adicionar Imagem</h2>
-<form id="formImagem" enctype="multipart/form-data">
-    <input type="file" id="imagemInput" name="imagem" accept="image/*" onchange="previewImagem()"><br><br>
-    <input type="text" id="descricaoInput" name="descricao" placeholder="Descrição"><br><br>
-    <div id="imagePreview" class="image-preview"></div>
-    <button type="button" onclick="postarImagem()">Postar</button>
-    <button type="button" onclick="fecharPopupImagem()">Fechar</button>
-</form>
 
+<div id="popup-imagem" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background-color:#fff; padding:20px; border:1px solid #ddd; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2);">
+    <h2>Adicionar Imagem</h2>
+    <form id="formImagem" enctype="multipart/form-data">
+        <input type="file" id="imagemInput" name="imagem" accept="image/*" onchange="previewImagem()"><br><br>
+        <input type="text" id="descricaoInput" name="descricao" placeholder="Descrição"><br><br>
+        <div id="imagePreview" class="image-preview"></div>
+        <button type="button" onclick="abrirPopupImagem()">salvar</button>
+        <button type="button" onclick="postarImagem()">Postar</button>
+        <button type="button" onclick="fecharPopupImagem()">Fechar</button>
+    </form>
 </div>
 
 <script>
@@ -67,20 +72,25 @@ while ($row = mysqli_fetch_assoc($result)) {
         xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                document.getElementById('popup').innerHTML = xhr.responseText + '<button onclick="fecharPopup()">Fechar</button>';
-                document.getElementById('popup').style.display = 'block';
+                var popup = document.getElementById('popup');
+                popup.innerHTML = xhr.responseText + '<button onclick="fecharPopup()">Fechar</button>';
+                popup.style.display = 'block';
             }
         };
         xhr.send('nome=' + encodeURIComponent(nome));
     }
 
-    function fecharPopupImagem() {
-        document.getElementById('popup-imagem').style.display = 'none';
-        document.getElementById('imagePreview').innerHTML = '';
+    function fecharPopup() {
+        document.getElementById('popup').style.display = 'none';
     }
 
     function abrirPopupImagem() {
         document.getElementById('popup-imagem').style.display = 'block';
+    }
+
+    function fecharPopupImagem() {
+        document.getElementById('popup-imagem').style.display = 'none';
+        document.getElementById('imagePreview').innerHTML = '';
     }
 
     function previewImagem() {
@@ -111,14 +121,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     }
 
     function postarImagem() {
-        var form = document.getElementById('formImagem');
-        var imagemInput = document.getElementById('imagemInput').files[0];
-        var descricaoInput = document.getElementById('descricaoInput').value;
-        var formData = new FormData();
-
-        formData.append('imagem', imagemInput);
-        formData.append('descricao', descricaoInput);
-
+        var formData = new FormData(document.getElementById('formImagem'));
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'php/salvar_imagem.php', true);
         xhr.onload = function() {
